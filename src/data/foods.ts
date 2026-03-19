@@ -66,6 +66,67 @@ export const filipinoFoods: FoodItem[] = [
   { id: 'f048', name: 'Oatmeal', category: 'Grain', calories: 150, protein: 5, carbs: 27, fat: 2.5, fiber: 4, servingSize: '1 cup cooked', isFilipino: false },
   { id: 'f049', name: 'Whole Wheat Bread', category: 'Bread', calories: 138, protein: 6, carbs: 23, fat: 2, fiber: 2.8, servingSize: '2 slices', isFilipino: false },
   { id: 'f050', name: 'Low-fat Milk', category: 'Dairy', calories: 102, protein: 8, carbs: 12, fat: 2.4, fiber: 0, servingSize: '1 cup', isFilipino: false },
+
+  // ─── Budget-Friendly Filipino Meals ───────────────────────────────────────
+
+  // Pang-masa breakfast
+  { id: 'f051', name: 'Pandesal na may Margarina', category: 'Budget Meal', calories: 180, protein: 4, carbs: 28, fat: 7, fiber: 1, servingSize: '2 pcs', isFilipino: true },
+  { id: 'f052', name: 'Pandesal na may Peanut Butter', category: 'Budget Meal', calories: 250, protein: 8, carbs: 30, fat: 11, fiber: 2, servingSize: '2 pcs', isFilipino: true },
+  { id: 'f053', name: 'Instant Oatmeal (3-in-1)', category: 'Budget Meal', calories: 130, protein: 3, carbs: 26, fat: 2, fiber: 2, servingSize: '1 sachet', isFilipino: false },
+  { id: 'f054', name: 'Tinapay na may Itlog (Scrambled)', category: 'Budget Meal', calories: 220, protein: 9, carbs: 24, fat: 10, fiber: 1, servingSize: '1 serving', isFilipino: true },
+  { id: 'f055', name: 'Lugaw na may Itlog', category: 'Budget Meal', calories: 210, protein: 10, carbs: 32, fat: 5, fiber: 1, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f056', name: 'Mais (Boiled Corn)', category: 'Budget Meal', calories: 132, protein: 5, carbs: 29, fat: 2, fiber: 4, servingSize: '1 piece', isFilipino: true },
+
+  // Budget viands
+  { id: 'f057', name: 'Ginisang Sardinas', category: 'Budget Meal', calories: 220, protein: 18, carbs: 6, fat: 13, fiber: 1, servingSize: '1 serving', isFilipino: true },
+  { id: 'f058', name: 'Pritong Isda (Galunggong)', category: 'Budget Meal', calories: 195, protein: 26, carbs: 2, fat: 9, fiber: 0, servingSize: '1 piece', isFilipino: true },
+  { id: 'f059', name: 'Pritong Isda (Tilapia)', category: 'Budget Meal', calories: 185, protein: 28, carbs: 0, fat: 8, fiber: 0, servingSize: '1 piece', isFilipino: true },
+  { id: 'f060', name: 'Daing na Bangus', category: 'Budget Meal', calories: 210, protein: 25, carbs: 1, fat: 12, fiber: 0, servingSize: '1 serving', isFilipino: true },
+  { id: 'f061', name: 'Tuyo na may Kanin', category: 'Budget Meal', calories: 280, protein: 16, carbs: 42, fat: 6, fiber: 1, servingSize: '1 plate', isFilipino: true },
+  { id: 'f062', name: 'Tinapa (Smoked Fish)', category: 'Budget Meal', calories: 190, protein: 22, carbs: 0, fat: 11, fiber: 0, servingSize: '1 piece', isFilipino: true },
+  { id: 'f063', name: 'Ginisang Monggo na may Dilis', category: 'Budget Meal', calories: 240, protein: 16, carbs: 32, fat: 5, fiber: 9, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f064', name: 'Pritong Tokwa', category: 'Budget Meal', calories: 150, protein: 10, carbs: 4, fat: 10, fiber: 1, servingSize: '1 serving', isFilipino: true },
+  { id: 'f065', name: 'Tokwa at Baboy', category: 'Budget Meal', calories: 290, protein: 18, carbs: 6, fat: 20, fiber: 1, servingSize: '1 serving', isFilipino: true },
+  { id: 'f066', name: 'Adobong Kangkong', category: 'Budget Meal', calories: 120, protein: 4, carbs: 8, fat: 8, fiber: 3, servingSize: '1 serving', isFilipino: true },
+  { id: 'f067', name: 'Ginisang Repolyo', category: 'Budget Meal', calories: 95, protein: 3, carbs: 10, fat: 5, fiber: 3, servingSize: '1 serving', isFilipino: true },
+  { id: 'f068', name: 'Nilagang Baboy (Budget Cut)', category: 'Budget Meal', calories: 260, protein: 18, carbs: 12, fat: 15, fiber: 2, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f069', name: 'Sinigang na Bangus (sa Sampalok)', category: 'Budget Meal', calories: 210, protein: 24, carbs: 12, fat: 7, fiber: 3, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f070', name: 'Ginisang Togue', category: 'Budget Meal', calories: 110, protein: 6, carbs: 10, fat: 5, fiber: 3, servingSize: '1 serving', isFilipino: true },
+  { id: 'f071', name: 'Pork Cubed Adobo (Matipid)', category: 'Budget Meal', calories: 310, protein: 20, carbs: 7, fat: 22, fiber: 1, servingSize: '1 serving', isFilipino: true },
+  { id: 'f072', name: 'Ginisang Ampalaya na may Itlog', category: 'Budget Meal', calories: 145, protein: 8, carbs: 8, fat: 9, fiber: 3, servingSize: '1 serving', isFilipino: true },
+  { id: 'f073', name: 'Bulalo (Budget)', category: 'Budget Meal', calories: 280, protein: 22, carbs: 10, fat: 16, fiber: 2, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f074', name: 'Arrozcaldo na may Manok', category: 'Budget Meal', calories: 230, protein: 15, carbs: 30, fat: 6, fiber: 1, servingSize: '1 bowl', isFilipino: true },
+
+  // Budget snacks / merienda
+  { id: 'f075', name: 'Kamote Cue', category: 'Budget Meal', calories: 160, protein: 2, carbs: 35, fat: 3, fiber: 3, servingSize: '2 pcs', isFilipino: true },
+  { id: 'f076', name: 'Boiled Kamote (Sweet Potato)', category: 'Budget Meal', calories: 103, protein: 2, carbs: 24, fat: 0.1, fiber: 4, servingSize: '1 medium', isFilipino: true },
+  { id: 'f077', name: 'Boiled Saging na Saba', category: 'Budget Meal', calories: 115, protein: 1.5, carbs: 27, fat: 0.4, fiber: 2.5, servingSize: '1 piece', isFilipino: true },
+  { id: 'f078', name: 'Puto Bumbong', category: 'Budget Meal', calories: 180, protein: 3, carbs: 36, fat: 4, fiber: 2, servingSize: '2 pcs', isFilipino: true },
+  { id: 'f079', name: 'Ginataang Mais', category: 'Budget Meal', calories: 195, protein: 3, carbs: 38, fat: 5, fiber: 2, servingSize: '1 cup', isFilipino: true },
+  { id: 'f080', name: 'Lugaw na Maize / Lugaw Bisaya', category: 'Budget Meal', calories: 150, protein: 4, carbs: 30, fat: 2, fiber: 2, servingSize: '1 bowl', isFilipino: true },
+
+  // Affordable protein sources
+  { id: 'f081', name: 'Itlog na Maalat (Salted Egg)', category: 'Budget Meal', calories: 130, protein: 8, carbs: 1, fat: 10, fiber: 0, servingSize: '1 piece', isFilipino: true },
+  { id: 'f082', name: 'Pork Liver (Atay)', category: 'Budget Meal', calories: 165, protein: 22, carbs: 4, fat: 6, fiber: 0, servingSize: '100g', isFilipino: true },
+  { id: 'f083', name: 'Chicken Feet (Adidas)', category: 'Budget Meal', calories: 215, protein: 19, carbs: 0, fat: 15, fiber: 0, servingSize: '4 pcs', isFilipino: true },
+  { id: 'f084', name: 'Balut', category: 'Budget Meal', calories: 188, protein: 13, carbs: 5, fat: 13, fiber: 0, servingSize: '1 piece', isFilipino: true },
+  { id: 'f085', name: 'Dilis (Dried Anchovies)', category: 'Budget Meal', calories: 95, protein: 16, carbs: 0, fat: 3, fiber: 0, servingSize: '2 tbsp', isFilipino: true },
+  { id: 'f086', name: 'Sardinas sa Tomato Sauce', category: 'Budget Meal', calories: 200, protein: 19, carbs: 4, fat: 12, fiber: 1, servingSize: '1 can (155g)', isFilipino: true },
+  { id: 'f087', name: 'Corned Beef (Budget)', category: 'Budget Meal', calories: 190, protein: 14, carbs: 4, fat: 13, fiber: 0, servingSize: '3/4 cup', isFilipino: false },
+
+  // Affordable vegetables / sides
+  { id: 'f088', name: 'Pinakbet (Budget version)', category: 'Budget Meal', calories: 150, protein: 5, carbs: 14, fat: 8, fiber: 5, servingSize: '1 serving', isFilipino: true },
+  { id: 'f089', name: 'Nilaga na Gulay', category: 'Budget Meal', calories: 90, protein: 3, carbs: 16, fat: 2, fiber: 4, servingSize: '1 bowl', isFilipino: true },
+  { id: 'f090', name: 'Ensaladang Talong', category: 'Budget Meal', calories: 80, protein: 2, carbs: 10, fat: 4, fiber: 4, servingSize: '1 serving', isFilipino: true },
+  { id: 'f091', name: 'Ginisang Pechay', category: 'Budget Meal', calories: 85, protein: 3, carbs: 8, fat: 5, fiber: 2, servingSize: '1 serving', isFilipino: true },
+  { id: 'f092', name: 'Utan Bisaya (Mixed Veggies)', category: 'Budget Meal', calories: 100, protein: 4, carbs: 14, fat: 3, fiber: 5, servingSize: '1 bowl', isFilipino: true },
+
+  // Budget drinks
+  { id: 'f093', name: 'Tubig na may Kalamansi', category: 'Budget Meal', calories: 15, protein: 0, carbs: 4, fat: 0, fiber: 0, servingSize: '1 glass', isFilipino: true },
+  { id: 'f094', name: 'Gatas na de Lata (Evaporated)', category: 'Budget Meal', calories: 80, protein: 4, carbs: 6, fat: 5, fiber: 0, servingSize: '1/4 cup', isFilipino: false },
+  { id: 'f095', name: 'Instant Coffee (3-in-1)', category: 'Budget Meal', calories: 60, protein: 1, carbs: 12, fat: 1.5, fiber: 0, servingSize: '1 sachet', isFilipino: false },
 ];
 
 export const foodCategories = [...new Set(filipinoFoods.map(f => f.category))];
+
+export const budgetFoods = filipinoFoods.filter(f => f.category === 'Budget Meal');
