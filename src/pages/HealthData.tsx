@@ -13,7 +13,7 @@ const categoryEmoji: Record<string, string> = {
   'Meat': '🥩',
   'Seafood': '🐟',
   'Vegetables': '🥬',
-  'Legumes & Eggs': '🫘',
+  'Legumes & Eggs': '🥗',
   'Fruits': '🍌',
   'Snacks': '🍢',
   'Desserts': '🍮',
