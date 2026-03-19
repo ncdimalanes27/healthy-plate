@@ -14,9 +14,7 @@ function StatCard({ label, value, unit, icon: Icon }: any) {
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-gray-500 font-medium">{label}</span>
-        <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}
-        >
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-green-500">
           <Icon className="w-4 h-4 text-white" />
         </div>
       </div>
@@ -247,7 +245,7 @@ export default function Dashboard() {
             color: "bg-orange-500",
             emoji: "👤",
           },
-        ].map(({ label, desc, path, color, emoji }) => (
+        ].map(({ label, desc, path, emoji }) => (
           <button
             key={path}
             onClick={() => navigate(path)}
