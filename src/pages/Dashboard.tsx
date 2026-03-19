@@ -1,6 +1,6 @@
 import { useStore } from '../store/useStore';
 import { calculateTargetCalories, calculateBMI, getBMICategory } from '../utils/calculations';
-import { TrendingUp, Utensils, Droplets, Scale, ChevronRight, Flame } from 'lucide-react';
+import { TrendingUp, Droplets, Scale, ChevronRight, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function StatCard({ label, value, unit, color, icon: Icon }: any) {
@@ -134,7 +134,7 @@ export default function Dashboard() {
           { label: 'View Meal Plans', desc: 'Get a personalized Filipino meal plan', path: '/meal-plans', color: 'bg-blue-600', emoji: '📋' },
           { label: 'Health Monitoring', desc: 'Track weight, sugar & blood pressure', path: '/monitoring', color: 'bg-purple-600', emoji: '📈' },
           { label: 'Update Profile', desc: 'Keep your health profile up-to-date', path: '/profile', color: 'bg-orange-500', emoji: '👤' },
-        ].map(({ label, desc, path, color, emoji }) => (
+        ].map(({ label, desc, path, emoji }) => (
           <button
             key={path}
             onClick={() => navigate(path)}
