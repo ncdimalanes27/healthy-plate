@@ -16,7 +16,10 @@ export default function Login() {
     setLoading(true);
     try {
       const { user } = await signIn(email, password);
-      if (user) navigate('/dashboard');
+      if (user) {
+        // Profile will be fetched by App.tsx — just navigate
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Invalid email or password.');
     } finally {

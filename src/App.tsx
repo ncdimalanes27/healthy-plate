@@ -57,19 +57,46 @@ export default function App() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const buildUser = async (supabaseUser: any): Promise<AppUser | null> => {
+    // Check localStorage cache first for instant load
+    const cached = localStorage.getItem(`hp_profile_${supabaseUser.id}`);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // Use cache immediately, refresh in background
+        getProfile(supabaseUser.id).then((profile) => {
+          if (profile) {
+            const fresh = { id: supabaseUser.id, email: supabaseUser.email || '', name: profile.name, role: profile.role };
+            localStorage.setItem(`hp_profile_${supabaseUser.id}`, JSON.stringify(fresh));
+            setUser(fresh);
+          }
+        });
+        return parsed;
+      } catch {}
+    }
+    // No cache — fetch from Supabase
+    const profile = await getProfile(supabaseUser.id);
+    if (profile) {
+      const u = { id: supabaseUser.id, email: supabaseUser.email || '', name: profile.name, role: profile.role };
+      localStorage.setItem(`hp_profile_${supabaseUser.id}`, JSON.stringify(u));
+      return u;
+    }
+    return null;
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const profile = await getProfile(session.user.id);
-        if (profile) setUser({ id: session.user.id, email: session.user.email || '', name: profile.name, role: profile.role });
+        const u = await buildUser(session.user);
+        if (u) setUser(u);
       }
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       if (session?.user) {
-        const profile = await getProfile(session.user.id);
-        if (profile) setUser({ id: session.user.id, email: session.user.email || '', name: profile.name, role: profile.role });
+        const u = await buildUser(session.user);
+        if (u) setUser(u);
       } else {
         setUser(null);
       }
@@ -82,10 +109,11 @@ export default function App() {
     return (
       <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3 animate-pulse">
-            <span className="text-white text-xl">🌿</span>
+          <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <span className="text-white text-xl" style={{ animation: 'spin 1s linear infinite' }}>🌿</span>
           </div>
           <p className="text-green-600 font-medium text-sm">Loading HealthyPlate...</p>
+          <p className="text-green-400 text-xs mt-1">Connecting to database...</p>
         </div>
       </div>
     );
