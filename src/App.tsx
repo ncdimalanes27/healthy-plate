@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useStore } from './store/useStore';
 import Layout from './components/layout/Layout';
+import Tutorial from './components/Tutorial';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -21,13 +23,45 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
   return <>{children}</>;
 }
 
+function TutorialWrapper({ children }: { children: React.ReactNode }) {
+  const { currentUser, hasTutorialSeen } = useStore();
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    if (currentUser && !hasTutorialSeen(currentUser.id)) {
+      setShowTutorial(true);
+    }
+  }, [currentUser]);
+
+  return (
+    <>
+      {children}
+      {showTutorial && currentUser && (
+        <Tutorial
+          role={currentUser.role}
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <TutorialWrapper>
+                <Layout />
+              </TutorialWrapper>
+            </ProtectedRoute>
+          }
+        >
           {/* Patient routes */}
           <Route path="dashboard" element={<ProtectedRoute role="patient"><Dashboard /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute role="patient"><Profile /></ProtectedRoute>} />
