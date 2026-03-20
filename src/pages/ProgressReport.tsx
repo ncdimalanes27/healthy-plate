@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAllPatients, getLogsForUser } from '../lib/supabaseService';
-import { calculateBMI, getBMICategory, calculateTargetCalories } from '../utils/calculations';
+import { getAllPatients, getLogsForUser, calcTargetFromProfile } from '../lib/supabaseService';
+import { calculateBMI, getBMICategory } from '../utils/calculations';
 import { Search, TrendingUp, TrendingDown, Minus, X, Award } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
@@ -17,7 +17,7 @@ export default function ProgressReport() {
         const logs = await getLogsForUser(p.id);
         const bmi = p.weight && p.height ? calculateBMI(p.weight, p.height) : null;
         const { label: bmiLabel, color: bmiColor } = bmi ? getBMICategory(bmi) : { label: 'Unknown', color: '#888' };
-        const target = p.weight ? calculateTargetCalories({ weight: p.weight, height: p.height, age: p.age, gender: p.gender, activityLevel: p.activity_level, goal: p.goal }) : 2000;
+        const target = calcTargetFromProfile(p);
         const avgCals = logs.length ? Math.round(logs.reduce((s: number, l: any) => s + l.total_calories, 0) / logs.length) : 0;
         const weights = logs.filter((l: any) => l.weight).map((l: any) => l.weight);
         const startWeight = weights[0] || p.weight || 0;

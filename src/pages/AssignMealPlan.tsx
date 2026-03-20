@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllPatients, getAssignedPlansForPatient, insertAssignedPlan } from '../lib/supabaseService';
 import { generateMealPlan } from '../utils/mealPlanGenerator';
-import { calculateTargetCalories } from '../utils/calculations';
+import { calcTargetFromProfile } from '../lib/supabaseService';
 import { ClipboardList, Sparkles, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Props { user: { id: string; name: string } | null; }
@@ -28,10 +28,7 @@ export default function AssignMealPlan({ user }: Props) {
   }, [selectedPatient]);
 
   const patient = patients.find((p) => p.id === selectedPatient);
-  const targetCals = patient ? calculateTargetCalories({
-    weight: patient.weight, height: patient.height, age: patient.age,
-    gender: patient.gender, activityLevel: patient.activity_level, goal: patient.goal,
-  }) : 1800;
+  const targetCals = patient ? calcTargetFromProfile(patient) : 1800;
 
   const handleGenerate = () => {
     const cals = customCals ? parseInt(customCals) : targetCals;
@@ -78,7 +75,7 @@ export default function AssignMealPlan({ user }: Props) {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-800 text-sm truncate">{p.name}</p>
-                  <p className="text-xs text-gray-400">Target: {calculateTargetCalories({ weight: p.weight, height: p.height, age: p.age, gender: p.gender, activityLevel: p.activity_level, goal: p.goal })} kcal</p>
+                  <p className="text-xs text-gray-400">Target: {calcTargetFromProfile(p)} kcal</p>
                 </div>
               </div>
             </button>

@@ -27,7 +27,7 @@ export default function Dashboard({ user }: Props) {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [todayLog, setTodayLog] = useState<any>(null);
-  const [meals, setMeals] = useState<any[]>([]);
+  
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -35,7 +35,7 @@ export default function Dashboard({ user }: Props) {
     if (!user) return;
     getProfile(user.id).then(setProfile);
     getTodayLog(user.id, today).then(setTodayLog);
-    getMealEntries(user.id, today).then(setMeals);
+    
   }, [user]);
 
   const targetCals = profile ? calculateTargetCalories(profile) : 2000;

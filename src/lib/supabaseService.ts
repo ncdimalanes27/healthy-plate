@@ -173,3 +173,27 @@ export async function insertAssignedPlan(plan: any) {
   const { error } = await supabase.from('assigned_plans').insert(plan);
   if (error) throw error;
 }
+
+// Helper to calculate calories from Supabase profile data
+export function calcTargetFromProfile(p: any): number {
+  if (!p?.weight || !p?.height || !p?.age) return 2000;
+  const profile = {
+    userId: p.id || '',
+    weight: p.weight,
+    height: p.height,
+    age: p.age,
+    gender: p.gender || 'female',
+    activityLevel: p.activity_level || 'moderate',
+    healthConditions: p.health_conditions || [],
+    allergies: p.allergies || [],
+    goal: p.goal || 'maintain',
+  };
+  // Mifflin-St Jeor
+  let bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age;
+  bmr += profile.gender === 'male' ? 5 : -161;
+  const multipliers: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, veryActive: 1.9 };
+  const tdee = Math.round(bmr * (multipliers[profile.activityLevel] || 1.55));
+  if (profile.goal === 'lose') return tdee - 500;
+  if (profile.goal === 'gain') return tdee + 300;
+  return tdee;
+}

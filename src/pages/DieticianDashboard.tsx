@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAllPatients, getLogsForUser } from '../lib/supabaseService';
-import { calculateBMI, getBMICategory, calculateTargetCalories } from '../utils/calculations';
+import { getAllPatients, calcTargetFromProfile } from '../lib/supabaseService';
+import { calculateBMI, getBMICategory } from '../utils/calculations';
 import { Users, TrendingUp, AlertCircle, ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 interface Props { user: { id: string; name: string } | null; }
@@ -9,7 +9,7 @@ function PatientRow({ patient }: { patient: any }) {
   const [open, setOpen] = useState(false);
   const bmi = patient.weight && patient.height ? calculateBMI(patient.weight, patient.height) : null;
   const bmiInfo = bmi ? getBMICategory(bmi) : null;
-  const target = patient ? calculateTargetCalories({ weight: patient.weight, height: patient.height, age: patient.age, gender: patient.gender, activityLevel: patient.activity_level, goal: patient.goal }) : null;
+  const target = patient ? calcTargetFromProfile(patient) : null;
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
