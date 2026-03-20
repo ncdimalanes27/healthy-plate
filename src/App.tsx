@@ -57,63 +57,21 @@ export default function App() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const buildUser = async (supabaseUser: any): Promise<AppUser | null> => {
-    // Check localStorage cache first for instant load
-    const cached = localStorage.getItem(`hp_profile_${supabaseUser.id}`);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        // Use cache immediately, refresh in background
-        getProfile(supabaseUser.id).then((profile) => {
-          if (profile) {
-            const fresh = { id: supabaseUser.id, email: supabaseUser.email || '', name: profile.name, role: profile.role };
-            localStorage.setItem(`hp_profile_${supabaseUser.id}`, JSON.stringify(fresh));
-            setUser(fresh);
-          }
-        });
-        return parsed;
-      } catch {}
-    }
-    // No cache — fetch from Supabase
-    const profile = await getProfile(supabaseUser.id);
-    if (profile) {
-      const u = { id: supabaseUser.id, email: supabaseUser.email || '', name: profile.name, role: profile.role };
-      localStorage.setItem(`hp_profile_${supabaseUser.id}`, JSON.stringify(u));
-      return u;
-    }
-    return null;
-  };
-
   useEffect(() => {
-    // Check cache first — show app instantly if cached user exists
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        // Try cache first for instant load
-        const cached = localStorage.getItem(`hp_profile_${session.user.id}`);
-        if (cached) {
-          try {
-            setUser(JSON.parse(cached));
-            setLoading(false);
-            // Refresh in background silently
-            buildUser(session.user).then((u) => { if (u) setUser(u); });
-            return;
-          } catch {}
-        }
-        // No cache — fetch then show
-        const u = await buildUser(session.user);
-        if (u) setUser(u);
+        const profile = await getProfile(session.user.id);
+        if (profile) setUser({ id: session.user.id, email: session.user.email || '', name: profile.name, role: profile.role });
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        return;
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       if (session?.user) {
-        const u = await buildUser(session.user);
-        if (u) setUser(u);
+        const profile = await getProfile(session.user.id);
+        if (profile) setUser({ id: session.user.id, email: session.user.email || '', name: profile.name, role: profile.role });
+      } else {
+        setUser(null);
       }
     });
 
@@ -124,8 +82,10 @@ export default function App() {
     return (
       <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-green-600 font-medium text-sm">Loading...</p>
+          <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3 animate-pulse">
+            <span className="text-white text-xl">🌿</span>
+          </div>
+          <p className="text-green-600 font-medium text-sm">Loading HealthyPlate...</p>
         </div>
       </div>
     );
