@@ -85,20 +85,35 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Check cache first — show app instantly if cached user exists
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        // Try cache first for instant load
+        const cached = localStorage.getItem(`hp_profile_${session.user.id}`);
+        if (cached) {
+          try {
+            setUser(JSON.parse(cached));
+            setLoading(false);
+            // Refresh in background silently
+            buildUser(session.user).then((u) => { if (u) setUser(u); });
+            return;
+          } catch {}
+        }
+        // No cache — fetch then show
         const u = await buildUser(session.user);
         if (u) setUser(u);
       }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        return;
+      }
       if (session?.user) {
         const u = await buildUser(session.user);
         if (u) setUser(u);
-      } else {
-        setUser(null);
       }
     });
 
@@ -109,11 +124,8 @@ export default function App() {
     return (
       <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <span className="text-white text-xl" style={{ animation: 'spin 1s linear infinite' }}>🌿</span>
-          </div>
-          <p className="text-green-600 font-medium text-sm">Loading HealthyPlate...</p>
-          <p className="text-green-400 text-xs mt-1">Connecting to database...</p>
+          <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-green-600 font-medium text-sm">Loading...</p>
         </div>
       </div>
     );
