@@ -1,35 +1,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../store/useStore';
-import { Leaf } from 'lucide-react';
+import { signIn } from '../lib/supabaseService';
+import { Leaf, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { users, login } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find((u) => u.email === email);
-    if (!user) { setError('No account found with that email.'); return; }
-    // Demo: any password works
-    login(user);
-    navigate(user.role === 'dietician' ? '/dietician' : '/dashboard');
-  };
-
-  const demoLogin = (role: 'patient' | 'dietician') => {
-    const email = role === 'patient' ? 'patient@demo.com' : 'dietician@demo.com';
-    const user = users.find((u) => u.email === email)!;
-    login(user);
-    navigate(role === 'dietician' ? '/dietician' : '/dashboard');
+    setError('');
+    setLoading(true);
+    try {
+      const { user } = await signIn(email, password);
+      if (user) {
+        // Profile will be fetched by App.tsx — just navigate
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl mb-4 shadow-lg">
             <Leaf className="w-8 h-8 text-white" />
@@ -54,7 +54,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="you@example.com"
                 required
               />
@@ -65,36 +65,20 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="••••••••"
                 required
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50"
             >
-              Sign In
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          <div className="mt-6">
-            <p className="text-xs text-center text-gray-400 mb-3">— Quick Demo Access —</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => demoLogin('patient')}
-                className="border-2 border-green-200 text-green-700 hover:bg-green-50 text-sm font-medium py-2 rounded-xl transition-colors"
-              >
-                👤 Patient Demo
-              </button>
-              <button
-                onClick={() => demoLogin('dietician')}
-                className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50 text-sm font-medium py-2 rounded-xl transition-colors"
-              >
-                🩺 Dietician Demo
-              </button>
-            </div>
-          </div>
 
           <p className="text-center text-sm text-gray-500 mt-6">
             No account?{' '}

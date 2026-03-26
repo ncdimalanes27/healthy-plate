@@ -1,57 +1,43 @@
-import { useState } from 'react';
-import { useStore } from '../store/useStore';
-import { calculateBMI, getBMICategory, calculateTargetCalories } from '../utils/calculations';
+import { useState, useEffect } from 'react';
+import { getAllPatients, getLogsForUser, calcTargetFromProfile } from '../lib/supabaseService';
+import { calculateBMI, getBMICategory } from '../utils/calculations';
 import { Search, TrendingUp, TrendingDown, Minus, X, Award } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
-type Report = {
-  userId: string;
-  name: string;
-  age: number;
-  gender: string;
-  bmi: number;
-  bmiLabel: string;
-  bmiColor: string;
-  target: number;
-  avgCals: number;
-  currentWeight: number;
-  diff: number;
-  goal: string;
-  conditions: string[];
-  trend: 'improving' | 'stable' | 'declining';
-  logs: any[];
-};
-
 export default function ProgressReport() {
-  const { getAllPatients, getLogs } = useStore();
-  const patients = getAllPatients();
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Report | null>(null);
+  const [selected, setSelected] = useState<any>(null);
 
-  const reports: Report[] = patients
-    .filter((p) => p.profile)
-    .map(({ user, profile }) => {
-      const logs = getLogs(user.id);
-      const bmi = calculateBMI(profile!.weight, profile!.height);
-      const { label: bmiLabel, color: bmiColor } = getBMICategory(bmi);
-      const target = calculateTargetCalories(profile!);
-      const avgCals = logs.length
-        ? Math.round(logs.reduce((s, l) => s + l.totalCalories, 0) / logs.length)
-        : 0;
-      const weights = logs.filter((l) => l.weight).map((l) => l.weight!);
-      const startWeight = weights[0] || profile!.weight;
-      const currentWeight = weights[weights.length - 1] || profile!.weight;
-      const diff = parseFloat((currentWeight - startWeight).toFixed(1));
-      let trend: 'improving' | 'stable' | 'declining';
-      if (profile!.goal === 'lose') trend = diff < -0.5 ? 'improving' : diff > 0.5 ? 'declining' : 'stable';
-      else if (profile!.goal === 'gain') trend = diff > 0.5 ? 'improving' : diff < -0.5 ? 'declining' : 'stable';
-      else trend = Math.abs(diff) < 1 ? 'improving' : 'stable';
-      return { userId: user.id, name: user.name, age: profile!.age, gender: profile!.gender, bmi, bmiLabel, bmiColor, target, avgCals, currentWeight, diff, goal: profile!.goal, conditions: profile!.healthConditions, trend, logs };
-    });
+  useEffect(() => {
+    const load = async () => {
+      const patients = await getAllPatients();
+      const results = await Promise.all(patients.map(async (p) => {
+        const logs = await getLogsForUser(p.id);
+        const bmi = p.weight && p.height ? calculateBMI(p.weight, p.height) : null;
+        const { label: bmiLabel, color: bmiColor } = bmi ? getBMICategory(bmi) : { label: 'Unknown', color: '#888' };
+        const target = calcTargetFromProfile(p);
+        const avgCals = logs.length ? Math.round(logs.reduce((s: number, l: any) => s + l.total_calories, 0) / logs.length) : 0;
+        const weights = logs.filter((l: any) => l.weight).map((l: any) => l.weight);
+        const startWeight = weights[0] || p.weight || 0;
+        const currentWeight = weights[weights.length - 1] || p.weight || 0;
+        const diff = parseFloat((currentWeight - startWeight).toFixed(1));
+        let trend = 'stable';
+        if (p.goal === 'lose') trend = diff < -0.5 ? 'improving' : diff > 0.5 ? 'declining' : 'stable';
+        else if (p.goal === 'gain') trend = diff > 0.5 ? 'improving' : diff < -0.5 ? 'declining' : 'stable';
+        else trend = Math.abs(diff) < 1 ? 'improving' : 'stable';
+        return { userId: p.id, name: p.name, age: p.age, gender: p.gender, bmi, bmiLabel, bmiColor, target, avgCals, currentWeight, diff, goal: p.goal, conditions: p.health_conditions || [], trend, logs };
+      }));
+      setReports(results.filter((r) => r.bmi !== null));
+      setLoading(false);
+    };
+    load();
+  }, []);
 
   const filtered = reports.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()));
 
-  const trendChip = (trend: Report['trend']) => {
+  const trendChip = (trend: string) => {
     if (trend === 'improving') return { label: 'On track', cls: 'bg-green-50 text-green-700', icon: <TrendingUp className="w-3 h-3" /> };
     if (trend === 'declining') return { label: 'Needs attention', cls: 'bg-red-50 text-red-600', icon: <TrendingDown className="w-3 h-3" /> };
     return { label: 'Stable', cls: 'bg-gray-100 text-gray-500', icon: <Minus className="w-3 h-3" /> };
@@ -60,123 +46,71 @@ export default function ProgressReport() {
   const goalLabel = (g: string) => g === 'lose' ? 'Lose weight' : g === 'gain' ? 'Gain weight' : 'Maintain';
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-
-      {/* Header + search */}
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Progress Reports
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>Progress Reports</h1>
           <p className="text-gray-400 text-sm mt-1">{reports.length} patients · click a row to view full report</p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search patient..."
-            className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white w-56"
-          />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search patient..."
+            className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white w-56" />
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-          <span>Patient</span>
-          <span>BMI</span>
-          <span>Target</span>
-          <span>Avg Intake</span>
-          <span>Weight &Delta;</span>
-          <span>Status</span>
+          <span>Patient</span><span>BMI</span><span>Target</span><span>Avg Intake</span><span>Weight &Delta;</span><span>Status</span>
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-16 text-center text-gray-400">Loading reports...</div>
+        ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-gray-400">
             <p className="text-3xl mb-2">🔍</p>
-            <p className="text-sm">No patients found.</p>
+            <p className="text-sm">{search ? 'No patients found.' : 'No patient data yet.'}</p>
           </div>
         ) : (
           filtered.map((r) => {
             const chip = trendChip(r.trend);
             return (
-              <button
-                key={r.userId}
-                onClick={() => setSelected(r)}
-                className="w-full grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] px-5 py-4 border-b border-gray-50 hover:bg-green-50 transition-colors text-left items-center last:border-b-0"
-              >
+              <button key={r.userId} onClick={() => setSelected(r)}
+                className="w-full grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] px-5 py-4 border-b border-gray-50 hover:bg-green-50 transition-colors text-left items-center last:border-b-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm shrink-0">
-                    {r.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm">{r.name}</p>
-                    <p className="text-xs text-gray-400">{r.age} yrs · {goalLabel(r.goal)}</p>
-                  </div>
+                  <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm shrink-0">{r.name.charAt(0)}</div>
+                  <div><p className="font-semibold text-gray-800 text-sm">{r.name}</p><p className="text-xs text-gray-400">{r.age} yrs · {goalLabel(r.goal)}</p></div>
                 </div>
+                <div><span className="font-semibold text-gray-800 text-sm">{r.bmi}</span><span className="block text-xs font-medium" style={{ color: r.bmiColor }}>{r.bmiLabel}</span></div>
+                <div><span className="text-sm text-gray-700">{r.target}</span><span className="block text-xs text-gray-400">kcal/day</span></div>
+                <div><span className={`text-sm font-semibold ${r.avgCals <= r.target ? 'text-green-600' : 'text-orange-500'}`}>{r.avgCals}</span><span className="block text-xs text-gray-400">kcal avg</span></div>
                 <div>
-                  <span className="font-semibold text-gray-800 text-sm">{r.bmi}</span>
-                  <span className="block text-xs font-medium" style={{ color: r.bmiColor }}>{r.bmiLabel}</span>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-700">{r.target}</span>
-                  <span className="block text-xs text-gray-400">kcal/day</span>
-                </div>
-                <div>
-                  <span className={`text-sm font-semibold ${r.avgCals <= r.target ? 'text-green-600' : 'text-orange-500'}`}>{r.avgCals}</span>
-                  <span className="block text-xs text-gray-400">kcal avg</span>
-                </div>
-                <div>
-                  <span className={`text-sm font-semibold ${r.diff < 0 ? 'text-blue-500' : r.diff > 0 ? 'text-orange-400' : 'text-gray-400'}`}>
-                    {r.diff > 0 ? '+' : ''}{r.diff} kg
-                  </span>
+                  <span className={`text-sm font-semibold ${r.diff < 0 ? 'text-blue-500' : r.diff > 0 ? 'text-orange-400' : 'text-gray-400'}`}>{r.diff > 0 ? '+' : ''}{r.diff} kg</span>
                   <span className="block text-xs text-gray-400">{r.currentWeight} kg now</span>
                 </div>
-                <div>
-                  <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${chip.cls}`}>
-                    {chip.icon}{chip.label}
-                  </span>
-                </div>
+                <div><span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${chip.cls}`}>{chip.icon}{chip.label}</span></div>
               </button>
             );
           })
         )}
       </div>
 
-      {/* Detail Modal */}
       {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.35)' }}
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal header */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.35)' }} onClick={() => setSelected(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-lg">
-                  {selected.name.charAt(0)}
-                </div>
+                <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-lg">{selected.name.charAt(0)}</div>
                 <div>
                   <h2 className="font-bold text-gray-900 text-lg">{selected.name}</h2>
                   <p className="text-sm text-gray-400">{selected.age} yrs · {selected.gender} · {goalLabel(selected.goal)}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setSelected(null)}
-                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-              >
+              <button onClick={() => setSelected(null)} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
                 <X className="w-4 h-4 text-gray-500" />
               </button>
             </div>
-
-            <div className="p-6 space-y-6">
-              {/* Stats */}
+            <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   { label: 'BMI', val: String(selected.bmi), sub: selected.bmiLabel, subColor: selected.bmiColor },
@@ -191,31 +125,26 @@ export default function ProgressReport() {
                   </div>
                 ))}
               </div>
-
-              {/* Conditions */}
               {selected.conditions.length > 0 && (
                 <div>
                   <p className="text-sm font-semibold text-gray-600 mb-2">Health Conditions</p>
                   <div className="flex flex-wrap gap-2">
-                    {selected.conditions.map((c) => (
+                    {selected.conditions.map((c: string) => (
                       <span key={c} className="bg-amber-50 border border-amber-200 text-amber-700 text-xs px-3 py-1 rounded-full">{c}</span>
                     ))}
                   </div>
                 </div>
               )}
-
-              {/* Calorie chart */}
               {selected.logs.length > 0 && (
                 <div>
                   <p className="text-sm font-semibold text-gray-600 mb-3">Calorie Intake History</p>
                   <ResponsiveContainer width="100%" height={160}>
                     <AreaChart data={selected.logs.slice(-10).map((l: any) => ({
                       date: new Date(l.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
-                      calories: l.totalCalories,
-                      target: selected.target,
+                      calories: l.total_calories, target: selected.target,
                     }))}>
                       <defs>
-                        <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="cg3" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25} />
                           <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                         </linearGradient>
@@ -223,14 +152,12 @@ export default function ProgressReport() {
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} width={40} />
                       <Tooltip formatter={(v: any) => `${v} kcal`} />
-                      <Area type="monotone" dataKey="calories" stroke="#22c55e" fill="url(#cg2)" strokeWidth={2} name="Consumed" />
+                      <Area type="monotone" dataKey="calories" stroke="#22c55e" fill="url(#cg3)" strokeWidth={2} name="Consumed" />
                       <Line type="monotone" dataKey="target" stroke="#f97316" strokeDasharray="4 4" strokeWidth={1.5} dot={false} name="Target" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               )}
-
-              {/* Weight chart */}
               {selected.logs.some((l: any) => l.weight) && (
                 <div>
                   <p className="text-sm font-semibold text-gray-600 mb-3">Weight Trend</p>
@@ -247,7 +174,6 @@ export default function ProgressReport() {
                   </ResponsiveContainer>
                 </div>
               )}
-
               {selected.trend === 'improving' && (
                 <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">
                   <Award className="w-4 h-4 shrink-0" />
