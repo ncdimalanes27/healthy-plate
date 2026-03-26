@@ -174,8 +174,6 @@ export async function insertAssignedPlan(plan: any) {
   if (error) throw error;
 }
 
-<<<<<<< HEAD
-=======
 // ─── FOODS ───────────────────────────────────────────────────────────────────
 
 export async function getAllFoods() {
@@ -208,7 +206,6 @@ export async function getFoodsByCategory(category: string) {
   return data || [];
 }
 
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
 // Helper to calculate calories from Supabase profile data
 export function calcTargetFromProfile(p: any): number {
   if (!p?.weight || !p?.height || !p?.age) return 2000;

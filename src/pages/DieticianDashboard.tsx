@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-import { useState } from 'react';
-import { useStore } from '../store/useStore';
-import { calculateBMI, getBMICategory, calculateTargetCalories } from '../utils/calculations';
-import { Users, TrendingUp, AlertCircle, ChevronDown, ChevronUp, Search } from 'lucide-react';
-=======
 import { useState, useEffect } from 'react';
 import { getAllPatients, calcTargetFromProfile } from '../lib/supabaseService';
 import { calculateBMI, getBMICategory } from '../utils/calculations';
 import { Users, TrendingUp, AlertCircle, ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 interface Props { user: { id: string; name: string } | null; }
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
 
 function PatientRow({ patient }: { patient: any }) {
   const [open, setOpen] = useState(false);
@@ -20,58 +13,15 @@ function PatientRow({ patient }: { patient: any }) {
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-<<<<<<< HEAD
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left"
-      >
-        {/* Avatar */}
-=======
       <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left">
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm shrink-0">
           {patient.name.charAt(0)}
         </div>
-
-        {/* Name + email */}
         <div className="flex-1 min-w-0">
-<<<<<<< HEAD
-          <p className="font-semibold text-gray-800 text-sm truncate">{user.name}</p>
-          <p className="text-xs text-gray-400 truncate">{user.email}</p>
-=======
           <p className="font-semibold text-gray-800 text-sm truncate">{patient.name}</p>
           <p className="text-xs text-gray-400 truncate">{patient.email}</p>
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
         </div>
-
-        {/* BMI badge — hidden on very small screens */}
         {bmiInfo && (
-<<<<<<< HEAD
-          <span
-            className="hidden sm:inline-flex shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
-            style={{ background: bmiInfo.color + '22', color: bmiInfo.color }}
-          >
-            BMI {bmi} · {bmiInfo.label}
-          </span>
-        )}
-
-        {/* Calories */}
-        <div className="text-right shrink-0">
-          <p className="text-sm font-bold text-gray-700">{lastLog?.totalCalories ?? '--'}</p>
-          <p className="text-xs text-gray-400">kcal</p>
-        </div>
-
-        {open ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />}
-      </button>
-
-      {/* BMI badge shown below name on mobile */}
-      {bmiInfo && (
-        <div className="sm:hidden px-4 pb-2">
-          <span
-            className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
-            style={{ background: bmiInfo.color + '22', color: bmiInfo.color }}
-          >
-=======
           <span className="hidden sm:inline-flex shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
             style={{ background: bmiInfo.color + '22', color: bmiInfo.color }}>
             BMI {bmi} · {bmiInfo.label}
@@ -88,27 +38,11 @@ function PatientRow({ patient }: { patient: any }) {
         <div className="sm:hidden px-4 pb-2">
           <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
             style={{ background: bmiInfo.color + '22', color: bmiInfo.color }}>
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
             BMI {bmi} · {bmiInfo.label}
           </span>
         </div>
       )}
 
-<<<<<<< HEAD
-      {open && profile && (
-        <div className="px-4 pb-4 border-t border-gray-50 pt-4 space-y-4">
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {[
-              { label: 'Age', val: profile.age + ' yrs' },
-              { label: 'Height', val: profile.height + ' cm' },
-              { label: 'Weight', val: profile.weight + ' kg' },
-              { label: 'Goal', val: profile.goal === 'lose' ? '🔻 Lose' : profile.goal === 'gain' ? '📈 Gain' : '⚖️ Maintain' },
-              { label: 'Activity', val: profile.activityLevel },
-              { label: 'Target Cal', val: target + ' kcal' },
-              { label: 'Gender', val: profile.gender },
-              { label: 'BMI', val: `${bmi} — ${bmiInfo?.label}` },
-=======
       {open && (
         <div className="px-4 pb-4 border-t border-gray-50 pt-4 space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -121,7 +55,6 @@ function PatientRow({ patient }: { patient: any }) {
               { label: 'Target Cal', val: target ? target + ' kcal' : '--' },
               { label: 'Gender', val: patient.gender || '--' },
               { label: 'BMI', val: bmi ? `${bmi} — ${bmiInfo?.label}` : '--' },
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
             ].map(({ label, val }) => (
               <div key={label} className="bg-gray-50 rounded-xl px-3 py-2">
                 <p className="text-xs text-gray-400">{label}</p>
@@ -129,28 +62,7 @@ function PatientRow({ patient }: { patient: any }) {
               </div>
             ))}
           </div>
-<<<<<<< HEAD
-
-          {/* Meal log */}
-          {lastLog && lastLog.meals.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Recent Meal Log</p>
-              <div className="space-y-1.5">
-                {lastLog.meals.slice(0, 5).map((m: any) => (
-                  <div key={m.id} className="flex items-center justify-between text-sm gap-2">
-                    <span className="text-gray-600 truncate">{m.foodName}</span>
-                    <span className="text-green-600 font-medium shrink-0">{m.calories} kcal</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Health conditions */}
-          {profile.healthConditions.length > 0 && (
-=======
           {patient.health_conditions?.length > 0 && (
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
@@ -188,10 +100,6 @@ export default function DieticianDashboard({ user }: Props) {
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-<<<<<<< HEAD
-      {/* Header */}
-=======
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
       <div className="mb-5">
         <p className="text-green-600 font-semibold text-sm">Welcome back 👋</p>
         <h1 className="text-2xl font-bold text-gray-900 mt-0.5" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -200,10 +108,6 @@ export default function DieticianDashboard({ user }: Props) {
         <p className="text-gray-400 text-sm mt-1">Dietician Dashboard · Patient Overview</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Summary cards */}
-=======
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
           { label: 'Total Patients', val: patients.length, icon: Users, color: 'bg-blue-500' },
@@ -222,24 +126,11 @@ export default function DieticianDashboard({ user }: Props) {
         ))}
       </div>
 
-<<<<<<< HEAD
-      {/* Search */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search patients by name or email…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 border border-gray-200 rounded-xl py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
-        />
-=======
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input type="text" placeholder="Search patients by name or email…" value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 border border-gray-200 rounded-xl py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white" />
->>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
       </div>
 
       <div className="space-y-3">
