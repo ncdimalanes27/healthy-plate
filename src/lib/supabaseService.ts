@@ -174,6 +174,41 @@ export async function insertAssignedPlan(plan: any) {
   if (error) throw error;
 }
 
+<<<<<<< HEAD
+=======
+// ─── FOODS ───────────────────────────────────────────────────────────────────
+
+export async function getAllFoods() {
+  const { data, error } = await supabase
+    .from('foods')
+    .select('*')
+    .order('category', { ascending: true });
+  if (error) return [];
+  return data || [];
+}
+
+export async function searchFoods(query: string) {
+  const { data, error } = await supabase
+    .from('foods')
+    .select('*')
+    .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
+    .order('name', { ascending: true })
+    .limit(50);
+  if (error) return [];
+  return data || [];
+}
+
+export async function getFoodsByCategory(category: string) {
+  const { data, error } = await supabase
+    .from('foods')
+    .select('*')
+    .eq('category', category)
+    .order('name', { ascending: true });
+  if (error) return [];
+  return data || [];
+}
+
+>>>>>>> 3fcda7c (feat: fetch foods from Supabase database)
 // Helper to calculate calories from Supabase profile data
 export function calcTargetFromProfile(p: any): number {
   if (!p?.weight || !p?.height || !p?.age) return 2000;

@@ -1,29 +1,28 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../store/useStore';
-import { Leaf } from 'lucide-react';
-import type { User, UserRole } from '../types';
+import { signUp } from '../lib/supabaseService';
+import { Leaf, Loader2 } from 'lucide-react';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useStore();
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'patient' as UserRole });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'patient' as 'patient' | 'dietician' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password) {
-      setError('All fields are required.');
-      return;
+    if (!form.name || !form.email || !form.password) { setError('All fields are required.'); return; }
+    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      await signUp(form.email, form.password, form.name, form.role);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    const newUser: User = {
-      id: `u${Date.now()}`,
-      name: form.name,
-      email: form.email,
-      role: form.role,
-    };
-    register(newUser);
-    navigate(form.role === 'dietician' ? '/dietician' : '/dashboard');
   };
 
   return (
@@ -47,58 +46,39 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Juan dela Cruz"
-              />
+                placeholder="Juan dela Cruz" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="juan@example.com"
-              />
+                placeholder="juan@example.com" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="••••••••"
-              />
+                placeholder="At least 6 characters" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">I am a…</label>
               <div className="grid grid-cols-2 gap-3">
-                {(['patient', 'dietician'] as UserRole[]).map((role) => (
-                  <button
-                    key={role}
-                    type="button"
-                    onClick={() => setForm({ ...form, role })}
+                {(['patient', 'dietician'] as const).map((role) => (
+                  <button key={role} type="button" onClick={() => setForm({ ...form, role })}
                     className={`py-3 rounded-xl text-sm font-medium border-2 transition-colors ${
-                      form.role === role
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-gray-200 text-gray-600 hover:border-green-200'
-                    }`}
-                  >
+                      form.role === role ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-600 hover:border-green-200'
+                    }`}>
                     {role === 'patient' ? '👤 Patient' : '🩺 Dietician'}
                   </button>
                 ))}
               </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors"
-            >
-              Create Account
+            <button type="submit" disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50">
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
