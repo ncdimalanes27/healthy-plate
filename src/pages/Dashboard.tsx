@@ -1,29 +1,14 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  getProfile,
-  getTodayLog,
-  getMealEntries,
-} from "../lib/supabaseService";
-import {
-  calculateTargetCalories,
-  calculateBMI,
-  getBMICategory,
-} from "../utils/calculations";
-import { TrendingUp, Droplets, Scale, ChevronRight, Flame } from "lucide-react";
-
-interface Props {
-  user: { id: string; name: string; role: string } | null;
-}
+import { useStore } from '../store/useStore';
+import { calculateTargetCalories, calculateBMI, getBMICategory } from '../utils/calculations';
+import { TrendingUp, Droplets, Scale, ChevronRight, Flame } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function StatCard({ label, value, unit, color, icon: Icon }: any) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+    <div className={`bg-white rounded-2xl p-5 border border-gray-100 shadow-sm`}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-gray-500 font-medium">{label}</span>
-        <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}
-        >
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}>
           <Icon className="w-4 h-4 text-white" />
         </div>
       </div>
@@ -35,180 +20,94 @@ function StatCard({ label, value, unit, color, icon: Icon }: any) {
   );
 }
 
-export default function Dashboard({ user }: Props) {
+export default function Dashboard() {
+  const { currentUser, getProfile, getTodayLog } = useStore();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<any>(null);
-  const [todayLog, setTodayLog] = useState<any>(null);
-
-  const today = new Date().toISOString().split("T")[0];
-  const [pageLoading, setPageLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    getProfile(user.id).then(setProfile);
-    getTodayLog(user.id, today).then(setTodayLog);
-  }, [user]);
+  const profile = getProfile(currentUser?.id || '');
+  const todayLog = getTodayLog(currentUser?.id || '');
 
   const targetCals = profile ? calculateTargetCalories(profile) : 2000;
-  const consumed = todayLog?.total_calories || 0;
+  const consumed = todayLog?.totalCalories || 0;
   const remaining = targetCals - consumed;
   const progressPct = Math.min((consumed / targetCals) * 100, 100);
+
   const bmi = profile ? calculateBMI(profile.weight, profile.height) : null;
   const bmiInfo = bmi ? getBMICategory(bmi) : null;
 
-  if (pageLoading)
-    return (
-      <div className="flex items-center justify-center h-full min-h-64">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-green-600 text-sm font-medium">
-            Loading your dashboard...
-          </p>
-        </div>
-      </div>
-    );
-
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto">
+      {/* Header */}
       <div className="mb-8">
         <p className="text-green-600 font-semibold text-sm">{greeting} 👋</p>
-        <h1
-          className="text-2xl font-bold text-gray-900 mt-0.5"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          {user?.name}
+        <h1 className="text-2xl font-bold text-gray-900 mt-0.5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          {currentUser?.name}
         </h1>
-        <p className="text-gray-400 text-sm mt-1">
-          {new Date().toLocaleDateString("en-PH", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
+        <p className="text-gray-400 text-sm mt-1">{new Date().toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
+      {/* Calorie ring + stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 mb-4">
-            Today's Calories
-          </p>
+        {/* Calorie progress */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm md:col-span-1">
+          <p className="text-sm font-medium text-gray-500 mb-4">Today's Calories</p>
           <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 shrink-0">
+            <div className="relative w-20 h-20">
               <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#dcfce7" strokeWidth="8" />
                 <circle
-                  cx="40"
-                  cy="40"
-                  r="32"
-                  fill="none"
-                  stroke="#dcfce7"
-                  strokeWidth="8"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="32"
-                  fill="none"
-                  stroke="#16a34a"
-                  strokeWidth="8"
+                  cx="40" cy="40" r="32" fill="none"
+                  stroke="#16a34a" strokeWidth="8"
                   strokeDasharray={`${(progressPct / 100) * 201} 201`}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-bold text-gray-700">
-                  {Math.round(progressPct)}%
-                </span>
+                <span className="text-xs font-bold text-gray-700">{Math.round(progressPct)}%</span>
               </div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {consumed}
+            <div className="space-y-1.5">
+              <div>
+                <span className="text-2xl font-bold text-gray-900">{consumed}</span>
                 <span className="text-sm text-gray-400"> / {targetCals}</span>
               </div>
-              <p className="text-xs mt-1">
+              <p className="text-xs text-gray-500">
                 {remaining > 0 ? (
-                  <span className="text-green-600 font-medium">
-                    {remaining} kcal remaining
-                  </span>
+                  <span className="text-green-600 font-medium">{remaining} kcal remaining</span>
                 ) : (
-                  <span className="text-orange-500 font-medium">
-                    Over by {Math.abs(remaining)} kcal
-                  </span>
+                  <span className="text-orange-500 font-medium">Over by {Math.abs(remaining)} kcal</span>
                 )}
               </p>
             </div>
           </div>
+          {/* Macro bars */}
           <div className="mt-4 space-y-2">
             {[
-              {
-                label: "Protein",
-                val: todayLog?.total_protein || 0,
-                max: 120,
-                color: "bg-blue-500",
-              },
-              {
-                label: "Carbs",
-                val: todayLog?.total_carbs || 0,
-                max: 250,
-                color: "bg-amber-400",
-              },
-              {
-                label: "Fat",
-                val: todayLog?.total_fat || 0,
-                max: 65,
-                color: "bg-pink-400",
-              },
+              { label: 'Protein', val: todayLog?.totalProtein || 0, max: 120, color: 'bg-blue-500' },
+              { label: 'Carbs', val: todayLog?.totalCarbs || 0, max: 250, color: 'bg-amber-400' },
+              { label: 'Fat', val: todayLog?.totalFat || 0, max: 65, color: 'bg-pink-400' },
             ].map(({ label, val, max, color }) => (
               <div key={label} className="flex items-center gap-2">
                 <span className="text-xs text-gray-400 w-12">{label}</span>
                 <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                  <div
-                    className={`h-1.5 rounded-full ${color}`}
-                    style={{ width: `${Math.min((val / max) * 100, 100)}%` }}
-                  />
+                  <div className={`h-1.5 rounded-full ${color}`} style={{ width: `${Math.min((val / max) * 100, 100)}%` }} />
                 </div>
-                <span className="text-xs text-gray-500 w-10 text-right">
-                  {Math.round(val)}g
-                </span>
+                <span className="text-xs text-gray-500 w-10 text-right">{val}g</span>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Stat cards */}
         <div className="md:col-span-2 grid grid-cols-2 gap-4">
-          <StatCard
-            label="BMI"
-            value={bmi || "--"}
-            unit={bmiInfo?.label}
-            color="bg-green-500"
-            icon={Scale}
-          />
-          <StatCard
-            label="Target Calories"
-            value={targetCals}
-            unit="kcal"
-            color="bg-orange-400"
-            icon={Flame}
-          />
-          <StatCard
-            label="Blood Sugar"
-            value={todayLog?.blood_sugar || "--"}
-            unit="mg/dL"
-            color="bg-purple-500"
-            icon={Droplets}
-          />
+          <StatCard label="BMI" value={bmi || '--'} unit={bmiInfo?.label} color="bg-green-500" icon={Scale} />
+          <StatCard label="Target Calories" value={targetCals} unit="kcal" color="bg-orange-400" icon={Flame} />
+          <StatCard label="Blood Sugar" value={todayLog?.bloodSugar || '--'} unit="mg/dL" color="bg-purple-500" icon={Droplets} />
           <StatCard
             label="Blood Pressure"
-            value={
-              todayLog?.blood_pressure_systolic
-                ? `${todayLog.blood_pressure_systolic}/${todayLog.blood_pressure_diastolic}`
-                : "--"
-            }
+            value={todayLog?.bloodPressureSystolic ? `${todayLog.bloodPressureSystolic}/${todayLog.bloodPressureDiastolic}` : '--'}
             unit="mmHg"
             color="bg-red-400"
             icon={TrendingUp}
@@ -216,50 +115,25 @@ export default function Dashboard({ user }: Props) {
         </div>
       </div>
 
-      {profile?.health_conditions?.length > 0 && (
+      {/* Health conditions */}
+      {profile?.healthConditions && profile.healthConditions.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-          <p className="text-sm font-semibold text-amber-800 mb-2">
-            Health Conditions to Note
-          </p>
+          <p className="text-sm font-semibold text-amber-800 mb-2">Health Conditions to Note</p>
           <div className="flex flex-wrap gap-2">
-            {profile.health_conditions.map((c: string) => (
-              <span
-                key={c}
-                className="bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-full"
-              >
-                {c}
-              </span>
+            {profile.healthConditions.map((c) => (
+              <span key={c} className="bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-full">{c}</span>
             ))}
           </div>
         </div>
       )}
 
+      {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
-          {
-            label: "Log a Meal",
-            desc: "Add your latest meal to track calories",
-            path: "/health-data",
-            emoji: "🍽️",
-          },
-          {
-            label: "View Meal Plans",
-            desc: "Get a personalized Filipino meal plan",
-            path: "/meal-plans",
-            emoji: "📋",
-          },
-          {
-            label: "Health Monitoring",
-            desc: "Track weight, sugar & blood pressure",
-            path: "/monitoring",
-            emoji: "📈",
-          },
-          {
-            label: "Update Profile",
-            desc: "Keep your health profile up-to-date",
-            path: "/profile",
-            emoji: "👤",
-          },
+          { label: 'Log a Meal', desc: 'Add your latest meal to track calories', path: '/health-data', color: 'bg-green-600', emoji: '🍽️' },
+          { label: 'View Meal Plans', desc: 'Get a personalized Filipino meal plan', path: '/meal-plans', color: 'bg-blue-600', emoji: '📋' },
+          { label: 'Health Monitoring', desc: 'Track weight, sugar & blood pressure', path: '/monitoring', color: 'bg-purple-600', emoji: '📈' },
+          { label: 'Update Profile', desc: 'Keep your health profile up-to-date', path: '/profile', color: 'bg-orange-500', emoji: '👤' },
         ].map(({ label, desc, path, emoji }) => (
           <button
             key={path}
