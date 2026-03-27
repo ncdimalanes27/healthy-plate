@@ -63,7 +63,7 @@ export default function App() {
           }
         >
           {/* Patient routes */}
-          <Route path="dashboard" element={<ProtectedRoute role="patient"><Dashboard /></ProtectedRoute>} />
+          <Route path="dashboard" element={<ProtectedRoute role="patient"><Dashboard user={user} /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute role="patient"><Profile /></ProtectedRoute>} />
           <Route path="health-data" element={<ProtectedRoute role="patient"><HealthData /></ProtectedRoute>} />
           <Route path="meal-plans" element={<ProtectedRoute role="patient"><MealPlans /></ProtectedRoute>} />
