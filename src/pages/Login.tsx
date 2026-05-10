@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Dinagdag ang useNavigate
 import { supabase } from '../lib/supabase';
 import { Eye, EyeOff, Utensils } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate(); // Initialize navigate
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,9 +16,37 @@ export default function Login() {
     setLoading(true);
     setError('');
     
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setError(error.message);
-    setLoading(false);
+    try {
+      // 1. Sign in gamit ang Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // 2. Kunin ang role mula sa 'profiles' table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authData.user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // 3. I-redirect base sa role
+        if (profile?.role === 'dietitian') {
+          navigate('/dietitian/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,7 +92,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-8.5 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
