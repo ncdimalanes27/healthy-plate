@@ -20,7 +20,6 @@ export default function Register() {
     setLoading(true);
     setError('');
 
-    // 1. Sign up user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -33,7 +32,6 @@ export default function Register() {
     }
 
     if (authData.user) {
-      // 2. Create the profile in our custom profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -111,7 +109,7 @@ export default function Register() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[34px] text-gray-400"
+              className="absolute right-3 top-9 text-gray-400"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
