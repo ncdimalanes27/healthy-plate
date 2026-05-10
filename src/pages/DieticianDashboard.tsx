@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { calculateBMI, getBMICategory, calculateTargetCalories } from '../utils/calculations';
 import type { Profile } from '../types';
-import { Search, ChevronDown, ChevronUp, User, Activity, ClipboardList, MessageSquare } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, ClipboardList, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function DieticianDashboard() {

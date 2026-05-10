@@ -14,10 +14,6 @@ export default function MealPlans({ profile }: { profile: Profile }) {
 
   const target = calculateTargetCalories(profile);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     const { data: foodData } = await supabase.from('foods').select('*');
     if (foodData) setFoods(foodData);
@@ -28,6 +24,12 @@ export default function MealPlans({ profile }: { profile: Profile }) {
       .order('created_at', { ascending: false });
     if (plans) setSavedPlans(plans);
   };
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  
 
   const handleGenerate = () => {
     setIsGenerating(true);

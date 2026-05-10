@@ -19,10 +19,6 @@ export default function HealthMonitoring({ profile }: { profile: Profile }) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
   const fetchLogs = async () => {
     const { data } = await supabase
       .from('daily_logs')
@@ -32,6 +28,12 @@ export default function HealthMonitoring({ profile }: { profile: Profile }) {
     if (data) setLogs(data);
     setLoading(false);
   };
+  
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  
 
   const handleSaveMetrics = async (e: React.FormEvent) => {
     e.preventDefault();

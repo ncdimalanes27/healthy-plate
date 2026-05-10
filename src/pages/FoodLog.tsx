@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { supabaseService } from '../lib/supabaseService';
 import { foodCategories } from '../data/foods';
@@ -11,15 +12,17 @@ export default function FoodLog({ profile }: { profile: Profile }) {
   const [loading, setLoading] = useState(true);
   const [logging, setLogging] = useState(false);
 
-  useEffect(() => {
-    fetchFoods();
-  }, []);
-
   const fetchFoods = async () => {
     const { data } = await supabase.from('foods').select('*');
     if (data) setFoods(data);
     setLoading(false);
   };
+  
+  useEffect(() => {
+    fetchFoods();
+  }, []);
+
+  
 
   const filteredFoods = foods.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(search.toLowerCase());
