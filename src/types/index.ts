@@ -1,3 +1,5 @@
+// src/types/index.ts
+
 export type UserRole = 'patient' | 'dietitian';
 
 export interface Profile {
@@ -41,4 +43,51 @@ export interface DailyLog {
   blood_sugar?: number;
   blood_pressure_systolic?: number;
   blood_pressure_diastolic?: number;
+}
+
+// --- ETO YUNG MGA DAGDAG PARA MAWALA ANG ERRORS ---
+
+export interface DieticianNote {
+  id: string;
+  dietitian_id: string;
+  patient_id: string;
+  content: string;
+  created_at: string;
+  // Optional: para sa UI labeling
+  dietitian_name?: string; 
+}
+
+export interface MealPlan {
+  id: string;
+  patient_id: string;
+  dietitian_id?: string;
+  title: string;
+  description: string;
+  calories_target: number;
+  carbs_target?: number;
+  protein_target?: number;
+  fat_target?: number;
+  status: 'active' | 'archived';
+  created_at: string;
+}
+
+export interface FoodLogEntry {
+  id: string;
+  user_id: string;
+  food_id: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  servings: number;
+  logged_at: string;
+  // Joined data mula sa Food table
+  food?: Food; 
+}
+
+export interface HealthMetric {
+  id: string;
+  user_id: string;
+  type: 'weight' | 'blood_sugar' | 'blood_pressure';
+  value_primary: number;
+  value_secondary?: number; // Para sa diastolic ng blood pressure
+  unit: string;
+  recorded_at: string;
 }

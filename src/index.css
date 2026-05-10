@@ -1,22 +1,81 @@
+/* 1. Import Tailwind v4 */
 @import "tailwindcss";
 
-@theme {
-  /* Colors */
-  --color-primary: #16a34a;
-  --color-primary-dark: #15803d;
-  --color-primary-light: #f0fdf4;
+/* 2. Import Modern Font (Plus Jakarta Sans) */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-  /* Fonts */
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+/* 3. Theme Customization (Tailwind v4 way) */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui;
+  --color-primary: #10b981; /* Emerald-500 */
+  --color-primary-light: #ecfdf5; /* Emerald-50 */
+  --color-primary-dark: #059669; /* Emerald-600 */
+  --color-bg-light: #f8fafc; /* Slate-50 */
 }
 
+/* 4. Base Styles */
 @layer base {
   body {
-    @apply font-sans text-gray-900 bg-gray-50;
+    font-family: var(--font-sans);
+    background-color: var(--color-bg-light);
+    color: #0f172a; /* Slate-900 */
+    -webkit-font-smoothing: antialiased;
   }
-  
-  h1, h2, h3, h4, .font-serif {
-    @apply font-serif;
+}
+
+/* 5. Modern Components & Effects */
+@layer components {
+  /* Glassmorphism Card (No border, Soft Blur, Subtle Shadow) */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 2rem; /* Napakalambot na kanto */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03); /* Halos hindi pansing shadow */
   }
+
+  /* Animated Gradient Text */
+  .gradient-text {
+    background: linear-gradient(to right, #10b981, #f97316, #10b981);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-flow 6s ease infinite;
+  }
+
+  /* Modern Input Field */
+  .input-modern {
+    @apply w-full p-4 rounded-2xl bg-slate-50 border-none transition-all outline-none;
+    @apply focus:ring-2 focus:ring-primary/20 focus:bg-white;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply px-6 py-3 rounded-2xl bg-primary text-white font-bold transition-all;
+    @apply hover:bg-primary-dark active:scale-95 disabled:opacity-50;
+    @apply shadow-lg shadow-primary/10;
+  }
+}
+
+/* 6. Animations */
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
 }
