@@ -22,14 +22,18 @@ export default function App() {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
+  const initDone = useRef(false);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, showSpinner = false) => {
     try {
+      if (showSpinner && isMounted.current) setLoading(true);
+
       const cached = localStorage.getItem(`hp_u_${userId}`);
       if (cached && isMounted.current) {
         setUser(JSON.parse(cached));
-        setLoading(false);
+        if (isMounted.current) setLoading(false);
       }
+
       const { data, error } = await supabaseService.getProfile(userId);
       if (error) throw error;
       if (data && isMounted.current) {
@@ -45,6 +49,7 @@ export default function App() {
 
   useEffect(() => {
     isMounted.current = true;
+
     const safetyTimer = setTimeout(() => {
       if (isMounted.current) setLoading(false);
     }, 8000);
@@ -61,7 +66,7 @@ export default function App() {
             return;
           }
           sessionStorage.setItem('hp_tab_active', '1');
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, false);
         } else {
           if (isMounted.current) setLoading(false);
         }
@@ -69,20 +74,27 @@ export default function App() {
         if (isMounted.current) setLoading(false);
       } finally {
         clearTimeout(safetyTimer);
+        initDone.current = true;
       }
     };
+
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        setLoading(true);
-        await fetchProfile(session.user.id);
+        if (!initDone.current) {
+          await fetchProfile(session.user.id, false);
+        } else {
+          fetchProfile(session.user.id, false);
+        }
       } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-        setUser(null);
-        localStorage.clear();
-        if (isMounted.current) setLoading(false);
+        if (isMounted.current) {
+          setUser(null);
+          localStorage.clear();
+          setLoading(false);
+        }
       } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user.id, false);
       }
     });
 
@@ -94,15 +106,13 @@ export default function App() {
   }, [fetchProfile]);
 
   const handleLogout = async () => {
-    setLoading(true);
     try {
       await supabase.auth.signOut();
       setUser(null);
       localStorage.clear();
+      sessionStorage.clear();
     } catch (err) {
       console.error('Logout failed:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,7 +145,7 @@ export default function App() {
                 element={
                   <ProfilePage
                     profile={user}
-                    onProfileUpdate={() => user && fetchProfile(user.id)}
+                    onProfileUpdate={() => user && fetchProfile(user.id, false)}
                   />
                 }
               />
