@@ -170,6 +170,33 @@ export const supabaseService = {
     }
   },
 
+  async updateNote(id: string, updates: { content: string; category: string }) {
+    try {
+      const { data, error } = await supabase
+        .from('dietician_notes')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error: any) {
+      console.error('Error in updateNote:', error.message);
+      return { data: null, error };
+    }
+  },
+
+  async deleteNote(id: string) {
+    try {
+      const { error } = await supabase.from('dietician_notes').delete().eq('id', id);
+      if (error) throw error;
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error in deleteNote:', error.message);
+      return { error };
+    }
+  },
+
   async getDietitianSentNotes(dietitianId: string) {
     try {
       const { data, error } = await supabase
